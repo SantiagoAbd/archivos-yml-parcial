@@ -1,0 +1,39 @@
+nes (38 sloc)  1.25 KB
+   
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: movie-service
+          uri: lb://movie-service
+          predicates:
+            - Path=/movie-service/**
+          filters:
+            - AddRequestHeader=user-request-header, custom-user-request-header
+            - AddResponseHeader=user-response-header, custom-user-response-header
+            - LogFilter=Hola este es el mensaje, usuario, Santi
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/catalog-service/**
+          filters:
+            - AddRequestHeader=user-request-header, custom-user-request-header
+            - AddResponseHeader=user-response-header, custom-user-response-header
+            - LogFilter=Hola este es el mensaje, usuario, Santi
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+eureka:
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
